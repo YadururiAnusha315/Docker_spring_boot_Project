@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    tools{
+        maven "Maven3"
+    }
+    environment{
+        registry = "842675982830.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo"
+    }
+
+    stages {
+        stage('Git checkout') {
+            steps {
+               git 'https://github.com/YadururiAnusha315/Docker_spring_boot_Project.git'
+            }
+        }
+        stage('build jar file') {
+            steps {
+               sh 'mvn clean install'
+            }
+        }
+        stage('build image') {
+            steps {
+               script{
+                  dockerimage = docker.build("${registry}:${BUILD_NUMBER}")
+               }
+            }
+        }
+        stage('pushing to ecr') {
+            steps {
+               script{
+                   sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 842675982830.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo'
+                   sh 'docker push 842675982830.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo:$BUILD_NUMBER'
+               }
+            }
+        }
+    }
+}
