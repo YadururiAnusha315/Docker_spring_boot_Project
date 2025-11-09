@@ -33,5 +33,17 @@ pipeline {
                }
             }
         }
+       stage ("Helm package") {
+            steps {
+                    sh "helm package my-chart"
+                }
+            }
+                
+        stage ("Helm install") {
+            steps {
+                    sh "helm upgrade first my-chart-0.1.0.tgz"
+                }
+            }
+        }
     }
 }
